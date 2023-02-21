@@ -1,10 +1,12 @@
 
 import math
 player = 1
+player_symbol_pos = 'x'
+player_symbol_neg = 'o'
 EMPTY = 0
 MAX_DEPTH = math.inf
-WIN_REWARD = 100
-PRINT_MOVE_EVALUATION = True
+WIN_REWARD = 10
+PRINT_MOVE_EVALUATION = True    #if true prints out evaluation of each move for depth==0
 
 board = [0,0,0, 0,0,0, 0,0,0]
 
@@ -20,14 +22,22 @@ board4 = [0,0,-1, 0,-1,0 , -1,0,0]
 rows = columns = int(math.sqrt(len(board)))
 
 
+def getSymbol(player):
+    if (player == 1):
+        return player_symbol_pos
+    else:
+        return player_symbol_neg
+
 def printBoard(board):
     boardString = ""
     for i in range(rows):        
         for j in range(columns):
             if (board[i*rows + j] == 0):
-                boardString += " "
+                c = " "
             else:
-                boardString += str(board[i*rows + j])
+                
+                c = getSymbol(board[i*rows + j])
+            boardString += "{:^3}".format(c)
             if (j < columns - 1):
                 boardString += " | "
         boardString += "\n"
@@ -36,7 +46,7 @@ def printBoard(board):
 
 
 def getWinner(board):
-    #return winner_index (-1) or (1) if a player has won
+    #return winner-index (-1) or (1) if a player has won, 0 if nobody has won yet
     diagonal1_sum = 0
     diagonal2_sum = 0
     for i in range(rows):
@@ -65,6 +75,7 @@ def getWinner(board):
 
 
 def hasMoves(board):    
+    #true if positions of the board are empty
     for position in board:
         if position == EMPTY:
             return True
@@ -84,83 +95,44 @@ def getPossibleMoves(board):
             moves.append(index)
     return moves
 
-def maximize(player, depth):
-    winner = getWinner(board)
-    if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
-        return evaluate(depth, winner)
-
-    maxEval = -math.inf
-    moveWithMaxEval = 0
-    moves = getPossibleMoves(board)
-    for move in moves:
-        board[move] = player
-        moveEval = minimize( (-1) * player, depth + 1)
-        if (depth == 0 and PRINT_MOVE_EVALUATION):
-            print(str(move) + " : " + str(moveEval))
-        board[move] = EMPTY
-        if (moveEval > maxEval):
-            maxEval = moveEval
-            moveWithMaxEval = move
-
-    if (depth == 0):
-        board[moveWithMaxEval] = player
-    return maxEval
-
-
-
-def minimize(player, depth):
-    winner = getWinner(board)
-    if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
-        return evaluate(depth, winner)
-    
-    minEval = math.inf
-    moveWithMinEval = 0
-    moves = getPossibleMoves(board)
-
-    for move in moves:
-        board[move] = player
-        moveEval = maximize( (-1) * player, depth + 1)
-        if (depth == 0 and PRINT_MOVE_EVALUATION):
-            print(str(move) + " : " + str(moveEval))
-        board[move] = EMPTY
-        if (moveEval < minEval):
-            minEval = moveEval
-            moveWithMinEval = move
-
-    if (depth == 0):
-        board[moveWithMinEval] = player
-    return minEval
 
 def minimax(player, depth):
     winner = getWinner(board)
     if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
         return evaluate(depth, winner)
     
-    max_eval = (-1) * player * math.inf
-
+     #-inf if player is 1, inf if player is -1
+    best_eval = (-1) * player * math.inf   
     moveWithGreatestEval = 0
     moves = getPossibleMoves(board)
+
     for move in moves:
-        board[move] = player
+        #do move and get evaluation of move, thinking the opponent plays optimally
+        board[move] = player            
         moveEval = minimax((-1) * player, depth + 1)
-        if (depth == 0):
+
+        if (depth == 0) and PRINT_MOVE_EVALUATION:
             print(str(move) + " : " + str(moveEval))
+
+        #undo move
         board[move] = EMPTY
+
+        #if move was better then the previous best move, update
         if (player == -1):
             #minimize
-            if (moveEval < max_eval):
-                max_eval = moveEval
+            if (moveEval < best_eval):
+                best_eval = moveEval
                 moveWithGreatestEval = move
         else:
             #maximize
-            if (moveEval > max_eval):
-                max_eval = moveEval
+            if (moveEval > best_eval):
+                best_eval = moveEval
                 moveWithGreatestEval = move
 
     if (depth == 0):
         board[moveWithGreatestEval] = player
 
-    return moveWithGreatestEval
+    return best_eval
     
 def doMove(player):
     if (player == -1):
@@ -173,7 +145,7 @@ def play():
     player = 1
     while(hasMoves(board) and getWinner(board) == 0):
         #minimax(player, 0)
-        doMove(player)
+        minimax(player, 0)
         printBoard(board)
         player = player * (-1)
 
