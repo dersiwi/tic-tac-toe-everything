@@ -4,6 +4,7 @@ player = 1
 EMPTY = 0
 MAX_DEPTH = math.inf
 WIN_REWARD = 100
+PRINT_MOVE_EVALUATION = True
 
 board = [0,0,0, 0,0,0, 0,0,0]
 
@@ -94,6 +95,8 @@ def maximize(player, depth):
     for move in moves:
         board[move] = player
         moveEval = minimize( (-1) * player, depth + 1)
+        if (depth == 0 and PRINT_MOVE_EVALUATION):
+            print(str(move) + " : " + str(moveEval))
         board[move] = EMPTY
         if (moveEval > maxEval):
             maxEval = moveEval
@@ -117,6 +120,8 @@ def minimize(player, depth):
     for move in moves:
         board[move] = player
         moveEval = maximize( (-1) * player, depth + 1)
+        if (depth == 0 and PRINT_MOVE_EVALUATION):
+            print(str(move) + " : " + str(moveEval))
         board[move] = EMPTY
         if (moveEval < minEval):
             minEval = moveEval
@@ -125,6 +130,37 @@ def minimize(player, depth):
     if (depth == 0):
         board[moveWithMinEval] = player
     return minEval
+
+def minimax(player, depth):
+    winner = getWinner(board)
+    if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
+        return evaluate(depth, winner)
+    
+    max_eval = (-1) * player * math.inf
+
+    moveWithGreatestEval = 0
+    moves = getPossibleMoves(board)
+    for move in moves:
+        board[move] = player
+        moveEval = minimax((-1) * player, depth + 1)
+        if (depth == 0):
+            print(str(move) + " : " + str(moveEval))
+        board[move] = EMPTY
+        if (player == -1):
+            #minimize
+            if (moveEval < max_eval):
+                max_eval = moveEval
+                moveWithGreatestEval = move
+        else:
+            #maximize
+            if (moveEval > max_eval):
+                max_eval = moveEval
+                moveWithGreatestEval = move
+
+    if (depth == 0):
+        board[moveWithGreatestEval] = player
+
+    return moveWithGreatestEval
     
 def doMove(player):
     if (player == -1):
@@ -134,8 +170,9 @@ def doMove(player):
     
 
 def play():
-    player =1
-    while(hasMoves(board)):
+    player = 1
+    while(hasMoves(board) and getWinner(board) == 0):
+        #minimax(player, 0)
         doMove(player)
         printBoard(board)
         player = player * (-1)
