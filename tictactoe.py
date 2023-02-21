@@ -1,182 +1,143 @@
 
+import math
+player = 1
+EMPTY = 0
+MAX_DEPTH = math.inf
+WIN_REWARD = 100
 
-SIDE_LENGTH = 3
-FIELDS = SIDE_LENGTH * SIDE_LENGTH
-
-PLAYER_X = "x"
-PLAYER_O = "o"
-EMPTY = "-"
-
-
-
-PLAYER_X_EVAL = 10
-PLAYER_O_EVAL = -10
-
-PLAYER_X_INDEX = 1
-PLAYER_O_INDEX = -1
-
-PLAYER_X_FUNCTION = None
-PLAYER_O_FUNCITON = None
-
-GAME_RUNNING = True
-AI_MOVE = 0
-
-board = [EMPTY] * FIELDS
-bspBoard = [
-PLAYER_X, EMPTY, EMPTY,
-EMPTY, PLAYER_X, EMPTY, 
-EMPTY,EMPTY, PLAYER_X]
-bspBoard = [
-PLAYER_O, EMPTY, PLAYER_X,
-EMPTY, PLAYER_X, EMPTY, 
-PLAYER_X,EMPTY, PLAYER_O]
-
-def getEvalScore(playerIcon):
-    if playerIcon == PLAYER_X:
-        return PLAYER_X_EVAL
-    if playerIcon == PLAYER_O:
-        return PLAYER_O_EVAL
-
-def getPlayerToken(playerIndex):
-    if playerIndex == PLAYER_X_INDEX:
-        return PLAYER_X
-    if playerIndex == PLAYER_O_INDEX:
-        return PLAYER_O
-
-def evaluate(board):
-    #rows 
-    for i in range(SIDE_LENGTH):
-        baseRowIndex = i * 3
-        colEvaluation = evalThree(board, baseRowIndex, baseRowIndex + 1, baseRowIndex + 2)
-        if colEvaluation != 0: return colEvaluation
-    
-    #cols 
-    for i in range(SIDE_LENGTH):
-        colEvaluation = evalThree(board, i, i + SIDE_LENGTH, i + 2*SIDE_LENGTH)
-        if colEvaluation != 0: return colEvaluation
+board = [0,0,0, 0,0,0, 0,0,0]
 
 
-    #diagonals
-    diag1Evaluation = evalThree(board, 0, 4, 8)
-    if diag1Evaluation != 0: return diag1Evaluation
-    diag2Evaluation = evalThree(board, 2, 4, 6)
-    if diag2Evaluation != 0: return diag2Evaluation
 
-    return 0
-    
-def evalThree(board, indexOne, indexTwo, indexThree):
-    if (not board[indexOne] == EMPTY and board[indexOne] == board[indexTwo] and board[indexTwo] == board[indexThree]):  
-        return getEvalScore(board[indexOne])
-    return 0
+#testing boards
+board1 = [-1,-1,-1 , 0,0,0, 0,0,0]
+board2 = [0,-1,0,0,-1,-1 ,  0,-1,0]
+board3 = [-1,0,0, 0,-1,0 , 0,0,-1]
+board4 = [0,0,-1, 0,-1,0 , -1,0,0]
+
+
+rows = columns = int(math.sqrt(len(board)))
+
 
 def printBoard(board):
     boardString = ""
-    for i in range(1, len(board) + 1):
-        boardString += board[i - 1]
-        if i == len(board):
-            continue
-        if i % 3 == 0:
-            boardString += "\n"
-        else:
-            boardString += " |"
-
+    for i in range(rows):        
+        for j in range(columns):
+            if (board[i*rows + j] == 0):
+                boardString += " "
+            else:
+                boardString += str(board[i*rows + j])
+            if (j < columns - 1):
+                boardString += " | "
+        boardString += "\n"
     print(boardString)
 
 
 
-def makePlayerMove():
-    move = input("Your move : ")
-    moveAsInt = int(move)
-    if moveAsInt < 1 or moveAsInt >= FIELDS +1 or board[moveAsInt - 1] != EMPTY:
-        print("Illegal move. Only type 1-9. Also you can only move onto empty fields.")
-        return makePlayerMove()
-    return moveAsInt - 1
-
-#--------------------------------------------------------------------------------MINIMAX ALGORITHM
-
-
-def getPossibleMoves():
-    pass
-
-def makeMinimaxMove(playerToken, depth):
-    possibleMoves = getPossibleMoves()
-    bestMove = 0
-    bestMoveEval = 0
-    for move in possibleMoves:
-        board[move] = playerToken
-        evalMove = makeMinimaxMove(playerToken, depth + 1)
+def getWinner(board):
+    #return winner_index (-1) or (1) if a player has won
+    diagonal1_sum = 0
+    diagonal2_sum = 0
+    for i in range(rows):
+        rowsum = 0
+        columnsum = 0
         
-    pass
+        for j in range(columns):
+            #check if one player has all rows
+            rowsum += board[i * rows + j]
+            #check if one player has all columns
+            columnsum += board[i + columns*j]
+        if abs(rowsum) == rows:
+            return int (rowsum / rows)
+        if abs(columnsum) == columns:
+            return int (columnsum / rows) 
+
+
+        diagonal1_sum += board[i * (rows + 1)]  #0, 4, 8
+        diagonal2_sum += board[(rows - 1) + i*(rows - 1)] #2, 4, 6
+        if abs(diagonal1_sum) == rows:
+            return int (diagonal1_sum / rows)
+        if abs(diagonal2_sum) == columns:
+            return int (diagonal2_sum / rows) 
+    return 0
 
 
 
-def minimax(playerIndex):
-    possibleMoves = getPossibleMoves()
-    maxValue = -1000
-
-   
-
-def maximize(player, depth):
-    global AI_MOVE
-    possibleMoves = getPossibleMoves()
-    currBoardEval = evaluate()
-    if possibleMoves == None or currBoardEval != 0:
-        #board is either won or lost
-        return currBoardEval
-
-    maxValue = -1000
-
-    for move in possibleMoves:
-        board[move] = getPlayerToken(player)
-        #eval all other moves
-        moveValue = minimize(player * (-1), depth + 1)
-        if moveValue > maxValue:
-            maxValue = moveValue
-            if depth == 0:
-                AI_MOVE = move
-        board[move] = EMPTY
-
-def minimize(player, depth):
-    pass
-
-
-def makeMove(boardIndex, playerSymbol):
-    board[boardIndex] = playerSymbol
-    return evaluate(board)
-
-def movePossible():
-    for field in board:
-        if not field == EMPTY:
+def hasMoves(board):    
+    for position in board:
+        if position == EMPTY:
             return True
-
     return False
 
-def gameLoop():
-    global GAME_RUNNING
-    x_Function = PLAYER_X_FUNCTION
-    o_Funciton = PLAYER_O_FUNCITON
-    while GAME_RUNNING:
+def evaluate(depth, winner):
+    if (winner == 0):
+        return 0
+    #in case of winner ==1 returns 10 - depth, in case of -1 : -10+depth
+    return winner * WIN_REWARD - winner * depth
+
+def getPossibleMoves(board):
+    #return indexes of all empty moves on the board
+    moves = []
+    for index, position in enumerate(board):
+        if position == EMPTY:
+            moves.append(index)
+    return moves
+
+def maximize(player, depth):
+    winner = getWinner(board)
+    if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
+        return evaluate(depth, winner)
+
+    maxEval = -math.inf
+    moveWithMaxEval = 0
+    moves = getPossibleMoves(board)
+    for move in moves:
+        board[move] = player
+        moveEval = minimize( (-1) * player, depth + 1)
+        board[move] = EMPTY
+        if (moveEval > maxEval):
+            maxEval = moveEval
+            moveWithMaxEval = move
+
+    if (depth == 0):
+        board[moveWithMaxEval] = player
+    return maxEval
+
+
+
+def minimize(player, depth):
+    winner = getWinner(board)
+    if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
+        return evaluate(depth, winner)
+    
+    minEval = math.inf
+    moveWithMinEval = 0
+    moves = getPossibleMoves(board)
+
+    for move in moves:
+        board[move] = player
+        moveEval = maximize( (-1) * player, depth + 1)
+        board[move] = EMPTY
+        if (moveEval < minEval):
+            minEval = moveEval
+            moveWithMinEval = move
+
+    if (depth == 0):
+        board[moveWithMinEval] = player
+    return minEval
+    
+def doMove(player):
+    if (player == -1):
+        minimize(player, 0)
+    else:
+        maximize(player, 0)
+    
+
+def play():
+    player =1
+    while(hasMoves(board)):
+        doMove(player)
         printBoard(board)
-        if (makeMove(x_Function(), PLAYER_X) == PLAYER_X_EVAL):
-            print ("Player "+PLAYER_X+" won !")
-            GAME_RUNNING = False
-            continue
-        printBoard(board)
-        if not movePossible():
-            print("Its a draw!")
-        if (makeMove(o_Funciton(), PLAYER_O) == PLAYER_O_EVAL):
-            print ("Player "+PLAYER_O+" won !")
-            GAME_RUNNING = False
-            continue
-        if not movePossible():
-            print("Its a draw!")
-    printBoard(board)
+        player = player * (-1)
 
-
-def main():
-    global PLAYER_X_FUNCTION, PLAYER_O_FUNCITON
-    PLAYER_X_FUNCTION = makePlayerMove
-    PLAYER_O_FUNCITON = makePlayerMove
-    gameLoop()
-
-main()
+play()
