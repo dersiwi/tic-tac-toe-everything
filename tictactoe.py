@@ -1,12 +1,12 @@
 
-import math
+import math, random, time
 player = 1
 player_symbol_pos = 'x'
 player_symbol_neg = 'o'
 EMPTY = 0
 MAX_DEPTH = math.inf
 WIN_REWARD = 10
-PRINT_MOVE_EVALUATION = True    #if true prints out evaluation of each move for depth==0
+PRINT_MOVE_EVALUATION = False    #if true prints out evaluation of each move for depth==0
 
 board = [0,0,0, 0,0,0, 0,0,0]
 
@@ -29,13 +29,12 @@ def getSymbol(player):
         return player_symbol_neg
 
 def printBoard(board):
-    boardString = ""
+    boardString = "\n"
     for i in range(rows):        
         for j in range(columns):
             if (board[i*rows + j] == 0):
                 c = " "
             else:
-                
                 c = getSymbol(board[i*rows + j])
             boardString += "{:^3}".format(c)
             if (j < columns - 1):
@@ -96,7 +95,7 @@ def getPossibleMoves(board):
     return moves
 
 
-def minimax(player, depth):
+def minimax(player, depth, board):
     winner = getWinner(board)
     if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
         return evaluate(depth, winner)
@@ -109,7 +108,7 @@ def minimax(player, depth):
     for move in moves:
         #do move and get evaluation of move, thinking the opponent plays optimally
         board[move] = player            
-        moveEval = minimax((-1) * player, depth + 1)
+        moveEval = minimax((-1) * player, depth + 1, board)
 
         if (depth == 0) and PRINT_MOVE_EVALUATION:
             print(str(move) + " : " + str(moveEval))
@@ -133,13 +132,23 @@ def minimax(player, depth):
         board[moveWithGreatestEval] = player
 
     return best_eval
-    
-def doMove(player):
-    if (player == -1):
-        minimize(player, 0)
+
+
+def doMinimaxPlayerMove(player, board):
+    minimax(player, 0, board)
+
+def doRandomPlayerMove(player, board):
+    #ger random move and play it 
+    moves = getPossibleMoves(board)
+    move = moves[random.randint(0, len(moves) - 1)]
+    board[move] = player
+
+def doHumanPlayerMove(player, board):
+    move = int(input("Your move : "))
+    if board[move] == EMPTY:
+        board[move] = player
     else:
-        maximize(player, 0)
-    
+        doHumanPlayerMove(player)
 
 def play():
     player = 1
@@ -147,6 +156,37 @@ def play():
         #minimax(player, 0)
         minimax(player, 0)
         printBoard(board)
-        player = player * (-1)
+        #player = player * (-1)
+        doHumanPlayerMove((-1) * player)
+        printBoard(board)
 
-play()
+def playGame(playerOne, playerTwo, board, print=True):
+    """
+    params:
+        playerOne, playerTwo have to be one of the functions : 
+            - doRandomPlayerMove
+            - doHumanPlayerMove
+            - doMinimaxPlayerMove
+        
+        print=True means board is printed after every move, 
+        print=False means nothing is printed
+
+    return:
+        getWinner(board) if a winner or draw has been determined
+        if playerOne returns 1, if playerTwo won returns -1
+    """
+    player = 1
+    while(hasMoves(board) and getWinner(board) == 0):
+        playerOne(player, board)
+        if print:
+            printBoard(board)
+        player = player * (-1)
+        if (hasMoves(board) and getWinner(board) == 0):
+            playerTwo(player, board)
+            if print:
+                printBoard(board)
+
+        player = player * (-1)
+    
+    return getWinner(board)
+
