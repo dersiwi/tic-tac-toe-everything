@@ -82,4 +82,39 @@ class Board:
         self.setPlayerIcon(Board.EMPTY, move)
         self.emptyFields.append(move)
 
-board = Board(side_lengh=3, three_d=True)
+    def printBoard(self):
+        
+        if self.three_d:
+            three_d_stringArray = []
+            distance_between_planes = "          "
+            for plane in range(len(self.board)):
+                if (plane == 0):
+                    three_d_stringArray = self.get2dStringArray(self.board[plane])
+                else:
+                    #for threed_String, twod_String in zip(three_d_stringArray, self.get2dStringArray(self.board[plane])):
+                    for index_3d, twod_String in enumerate(self.get2dStringArray(self.board[plane])):
+                        three_d_stringArray[index_3d] += distance_between_planes + twod_String
+
+            stringArray = three_d_stringArray
+        else:
+            #in 2d case this means just printig each row-stirng of the stringarray
+            stringArray = self.get2dStringArray(self.board)
+
+        for string in stringArray:
+            print(string)
+
+    def get2dStringArray(self, two_d_array):
+        #basically returns an array of strings, where each entry represents one line to be printed 
+        stringarray = []
+        for i in range(len(two_d_array)):
+            rowString  = ""
+            for j in range(len(two_d_array[i])):
+                c = two_d_array[i][j]
+                rowString +=  "{:^3}".format(c)
+                if (j < len(two_d_array[i]) - 1):
+                    rowString += " | "
+            stringarray.append(rowString)
+        return stringarray
+
+board = Board(side_lengh=5, three_d=True)
+board.printBoard()
