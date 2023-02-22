@@ -133,9 +133,53 @@ def minimax(player, depth, board):
 
     return best_eval
 
+def minimaxAlphaBeta(player, depth, board, alpha, beta):
+        winner = getWinner(board)
+        if (depth >= MAX_DEPTH or not hasMoves(board) or winner != 0):
+            return evaluate(depth, winner)
+
+        best_eval = (-1) * player * math.inf   
+        moveWithGreatestEval = 0
+        moves = getPossibleMoves(board)
+
+        for move in moves:
+            #do move and get evaluation of move, thinking the opponent plays optimally
+            board[move] = player
+            if (player == -1):         
+                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, alpha, best_eval)
+            else:
+                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
+
+            if (depth == 0) and PRINT_MOVE_EVALUATION:
+                print(str(move) + " : " + str(moveEval))
+            board[move] = EMPTY
+
+            #if move was better then the previous best move, update
+            if (player == -1):
+                #minimize
+                if (moveEval < best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
+                if (best_eval <= alpha):
+                    break
+            else:
+                #maximize
+                if (moveEval > best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
+                if (best_eval >= beta):
+                    break
+
+        if (depth == 0):
+            board[moveWithGreatestEval] = player
+        return best_eval
+
 
 def doMinimaxPlayerMove(player, board):
     minimax(player, 0, board)
+
+def doMinimaxAlphaBetaPlayerMove(player, board):
+    minimaxAlphaBeta(player, 0, board, -math.inf, math.inf)
 
 def doRandomPlayerMove(player, board):
     #ger random move and play it 
@@ -190,3 +234,4 @@ def playGame(playerOne, playerTwo, board, print=True):
     
     return getWinner(board)
 
+#playGame(doMinimaxAlphaBetaPlayerMove, doMinimaxAlphaBetaPlayerMove, board)

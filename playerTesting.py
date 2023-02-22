@@ -1,5 +1,5 @@
 import time, threading
-from tictactoe import playGame, doMinimaxPlayerMove, doRandomPlayerMove
+from tictactoe import playGame, doMinimaxPlayerMove, doRandomPlayerMove, doMinimaxAlphaBetaPlayerMove
 
 
 class SimThread(threading.Thread):
@@ -88,20 +88,31 @@ class SimThread(threading.Thread):
             statusPrintCounter += 1
 
 
-amountThreads = 4
-threads = []
-for threadid in range(amountThreads):
-    thread = SimThread(threadID = threadid,
-                        total_simultions=300000,
-                        playerOneMove=doRandomPlayerMove,
-                        playerTwoMove=doMinimaxPlayerMove,
-                        printStatusPeriodically=True,
-                        printTimeEestimation=True,
-                        simsBetweenStatusPrints=10000,
-                        simsBeforeTimeEstimation= 5)
-    threads.append(thread)
+def simulate(amountThreads, amountSimulations):
+    threads = []
+    for threadid in range(amountThreads):
+        thread = SimThread(threadID = threadid,
+                            total_simultions=amountSimulations,
+                            playerOneMove=doRandomPlayerMove,
+                            playerTwoMove=doMinimaxPlayerMove,
+                            printStatusPeriodically=True,
+                            printTimeEestimation=True,
+                            simsBetweenStatusPrints=10000,
+                            simsBeforeTimeEstimation= 5)
+        threads.append(thread)
 
-    thread.start()
+        thread.start()
 
-for thread in threads:
-    thread.join()
+    for thread in threads:
+        thread.join()
+
+
+simEnv = SimThread(threadID = 69,
+                    total_simultions=100,
+                    playerOneMove=doMinimaxAlphaBetaPlayerMove,
+                    playerTwoMove=doMinimaxAlphaBetaPlayerMove,
+                    printStatusPeriodically=True,
+                    printTimeEestimation=True,
+                    simsBetweenStatusPrints=10000,
+                    simsBeforeTimeEstimation= 5)
+simEnv.run()
