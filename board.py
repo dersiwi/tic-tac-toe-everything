@@ -6,9 +6,19 @@ class Board:
 
     EMPTY = 0
 
-    def __init__(self, side_lengh, three_d=False):
-        self.side_length = side_lengh
+    def __init__(self, side_length, three_d=False):
+        self.side_length = side_length
         self.three_d = three_d
+
+        #fields for board
+        self.board = []
+        self.rotatedBoard = []
+        self.rotatedDict = {}
+        self.emptyFields = []
+        self.initBoardFields()
+
+
+    def initBoardFields(self):
 
         self.board = []
         self.rotatedBoard = []
@@ -18,11 +28,15 @@ class Board:
         #for example :  rotatedDict[(0,0,0)] = (1, 0, 0) - in case of 3x3 
         #the invariant is that borad[(i, j, k)] == rotatedBoard[rotatedDict[(i,j,k)]]
 
-        self.rotatedDict = {}
-        self.calculateRotatedCellCoordinates()
+        if self.three_d:
+            self.rotatedDict = {}
+            self.calculateRotatedCellCoordinates()
 
         self.emptyFields = [] #todo : initialize correctly
         self.loopOverBoard(lambda i, j, k=-1: self.emptyFields.append((i, j)) if k == -1 else self.emptyFields.append((i,j,k)))
+    
+    def resetBoard(self):
+        self.initBoardFields()
 
     def initBoard(self):
         #initialize baord with all EMPTY fields
@@ -104,10 +118,30 @@ class Board:
         # return [1, -1] if either of these two is the winner, 0 if there is no winner
 
         if self.three_d:
-            for plane in range(len(self.board)):
-                winner = self.check2dBoard_forWinner(self.board[plane])
+
+            for plane, planeRotated in zip(self.board, self.rotatedBoard):
+                winner = self.check2dBoard_forWinner(plane)
+                winner_r = self.check2dBoard_forWinner(planeRotated)
                 if (winner != 0):
                     return winner
+                if (winner_r != 0):
+                    return winner_r
+
+
+            #still have to check cube diagonals - IF board dimension is odd!
+            if not (self.side_length % 2 == 0):
+                diagsums = [0,0,0,0]
+                for i in range(self.side_length):
+                    diagsums[0] += self.board[i][i][i]
+                    diagsums[1] += self.board[self.side_length - 1 - i][self.side_length - 1 - i][i]
+                    diagsums[2] += self.board[self.side_length - 1 - i][i][self.side_length - 1 - i]
+                    diagsums[3] += self.board[i][self.side_length - 1 - i][self.side_length - 1 - i]
+                
+                for diagsum in diagsums:
+                    if (abs(diagsum) == self.side_length):
+                        return int(diagsum / self.side_length)
+            return 0
+
             
             #after that : rotate the whole tic tac toe cube by 90 degrees, such that the forward facing plane is now on the left side (or right side) of the cube
             #check all three planes agian
@@ -118,10 +152,29 @@ class Board:
 
     def check2dBoard_forWinner(self, two_dboard):
         #return [-1, 1] if 1 or -1 won on this twod_board and 0 if there is no winner
-        for i in range(len(two_dboard)):
-            for j in range(len(two_dboard)):
+        dim = len(two_dboard)
+        diagonal1_sum = diagonal2_sum = 0
+        for i in range(dim):
+            rowsum = columnsum = 0
+            for j in range(dim):
+                #rows
+                rowsum += two_dboard[i][j]
 
-                pass
+                #cols
+                columnsum += two_dboard[j][i]
+
+            if abs(rowsum) == dim:
+                return int (rowsum / dim)
+            if abs(columnsum) == dim:
+                return int (columnsum / dim) 
+            
+            diagonal1_sum += two_dboard[i][i]  #0, 4, 8
+            diagonal2_sum += two_dboard[i][dim - 1 - i] #2, 4, 6
+        if abs(diagonal1_sum) == dim:
+            return int (diagonal1_sum / dim)
+        if abs(diagonal2_sum) == dim:
+            return int (diagonal2_sum / dim)
+        return 0 
 
 
 
@@ -186,5 +239,4 @@ class Board:
             stringarray.append(rowString)
         return stringarray
 
-board = Board(side_lengh=3, three_d=True)
-print(board.rotatedDict)
+b = Board(side_length=3)
