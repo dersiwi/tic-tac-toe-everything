@@ -191,7 +191,7 @@ class Board:
             x, y = move[0], move[1]
             self.board[x][y] = icon
 
-    def doMove(self, player,  move):
+    def doMove(self, move, player):
         #places player into the index described by move
         #keep live update of possible moves in self.emptyFields and self.hasMoves
 
@@ -238,5 +238,32 @@ class Board:
                     rowString += " | "
             stringarray.append(rowString)
         return stringarray
+    
+    def getSlice(self, plane_index, rotated, angled=0):
+        if not self.three_d:
+            return self.board.copy()
+        
+        #3d case
+        if not rotated:
+            return self.board[plane_index].copy()
+        else:
+            return self.rotatedBoard[plane_index].copy()
+        #angled is ignored until now
 
-b = Board(side_length=3)
+    def getAllSlices(self):
+        if not self.three_d:
+            return [self.board]
+        #3d case
+        slices = []
+        for i in range(self.side_length):
+            slices.append(self.getSlice(i, rotated=False))
+            slices.append(self.getSlice(i, rotated=True))
+
+        #rotated slices not implemented yet
+        return slices
+
+b = Board(side_length=3, three_d=True)
+b.doMove((0,0,0), 1)
+board_array = b.getAllSlices()
+board_array[0] = [12]
+b.printBoard()
