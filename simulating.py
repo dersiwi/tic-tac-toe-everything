@@ -95,17 +95,18 @@ class SimThread(threading.Thread):
 
 def simulate(amountThreads, amountSimulations, playerOne, playerTwo, boardSize, threed):
     threads = []
+    simulationsPerThread = int(amountSimulations / amountThreads)
     for threadid in range(amountThreads):
         thread = SimThread(threadID = threadid,
-                            total_simultions=amountSimulations,
+                            total_simultions= simulationsPerThread,
                             playerOne=playerOne,
                             playerTwo=playerTwo,
                             boardSize=boardSize,
                             three_d=threed,
                             printStatusPeriodically=isAllowedToPrint(message_verbosity=2, msgWhenSimulating=True),
                             printTimeEestimation=isAllowedToPrint(message_verbosity=1, msgWhenSimulating=True),
-                            simsBetweenStatusPrints=int(0.2*amountSimulations),
-                            simsBeforeTimeEstimation= int(0.1*amountSimulations))
+                            simsBetweenStatusPrints=int(0.2*simulationsPerThread),
+                            simsBeforeTimeEstimation= int(0.1*simulationsPerThread))
         threads.append(thread)
 
         thread.start()
@@ -113,14 +114,14 @@ def simulate(amountThreads, amountSimulations, playerOne, playerTwo, boardSize, 
     for thread in threads:
         thread.join()
 
-    overAllstats = [0,0,0] #draws, wins player one, wins player two
+    overAllstats = [amountSimulations, 0,0,0] #draws, wins player one, wins player two
     for thread in threads:
-        overAllstats[0] += thread.draws
-        overAllstats[1] += thread.playerOneWins
-        overAllstats[2] += thread.playerTwoWins
+        overAllstats[1] += thread.draws
+        overAllstats[2] += thread.playerOneWins
+        overAllstats[3] += thread.playerTwoWins
 
     table = PrettyTable()
-    table.field_names = ["Draws", "Wins : {0}".format(playerOne.getUniqueName()), "Wins : {0}".format(playerTwo.getUniqueName())]
+    table.field_names = ["Total Amount", "Draws", "Wins : {0}".format(playerOne.getUniqueName()), "Wins : {0}".format(playerTwo.getUniqueName())]
     table.add_row(overAllstats)
     print(table)
 

@@ -69,6 +69,9 @@ class Player:
             else:
                 playerFunction = doMinimaxAlphaBetaPlayerMove
                 name += "+alphaBeta"
+        else:
+            #default case if type was neither
+            return Player.setup(Player.RANDOM)
 
         
         return name + index, playerFunction

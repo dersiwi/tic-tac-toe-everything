@@ -36,6 +36,25 @@ def main(argv):
     except getopt.GetoptError as err:
         print(err)
 
+def parseTypes(types):
+    parsedTypes = []
+    for type in types:
+        if type.isdigit():
+            parsedTypes.append(int(type))
+        elif type == "random":
+            parsedTypes.append(Player.RANDOM)
+        elif type == "human":
+            parsedTypes.append(Player.HUMAN)
+        elif type == "minimax":
+            parsedTypes.append(Player.MINIMAX)
+        elif type == "minimax3d":
+            parsedTypes.append(Player.MINIMAX3D)
+        elif type == "minimax_ab":
+            parsedTypes.append(Player.MINIMAX_ALPHA_BETA)
+        else:
+            parsedTypes.append(Player.RANDOM)
+    return parsedTypes
+        
 
 def mainWithArgparse(argv):
     playertype_helpstring = "Type of player:\n random = 0\n human = 1\n minimax = 2\n minimax_alpha_beta = 3\n minimax3D = 4"
@@ -47,15 +66,15 @@ def mainWithArgparse(argv):
 
     parser.add_argument('-s', '--simulate', help="Simulate the given number of games", type=int)
     parser.add_argument('-t', '--threads', help="Amount of simulation threads", type=int, default=Constants.DEFAULT_AMOUNT_THREADS)
-    parser.add_argument('playertype', nargs=2, type=int, help=playertype_helpstring, default=[0,1])#nargs='*' for any number of args
+    parser.add_argument('playertype', nargs=2, help=playertype_helpstring, default=[0,1])#nargs='*' for any number of args
 
     args = parser.parse_args()
 
-    playertypes = args.playertype
+    playertypes = parseTypes(args.playertype)
     Constants.SYSTEM_VERBOSITY = int(args.verbosity)
-
     pOne = Player(type=playertypes[0], playerIndex= 1)
     pTwo = Player(type=playertypes[1], playerIndex= -1)
+
 
     
     if not args.simulate:

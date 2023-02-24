@@ -1,12 +1,10 @@
-# Tic-tac-toe
+# Tic-tac-toe-everything
 
-Idea :
-1. Implement the minimax algorithm to play tic-tac-toe
-2. Create a dataset, consisting of board configurations $c_i$ (9 input-parameters) and optimal moves $m_i$ with minimax 
-3. Train a neural network with that dataset
-4. Let the minimax algorithm play against the neural network
+Tic-tac-toe-everything is a terminal-based tic-tac-toe application that enables you to play all kinds of tic-tac-toe games
+First of all, not only regular $3 \times 3$ tic-tac-toe but any $n \times n$ tic-tac-toe. The next step is to play 3d-tic-tac-toe. <br>
+This program provides basically three types of players; human, random and an AI - based on the minimax algorithm. Furthermore it allows you to simulate a number of games between players and gather data about those games. <br>
+The real challenge is to write a fast enough algorithm for 3d tic-tac-toe.
 
-The idea changed : My goal now is to write an algorithm that solves 3d-tic tac toe. 
 
 ## Usage and parameters
 
@@ -21,23 +19,25 @@ The idea changed : My goal now is to write an algorithm that solves 3d-tic tac t
 
 ### Playertypes
 
-    RANDOM = 0
-    HUMAN = 1
-    MINIMAX = 2
-    MINIMAX_ALPHA_BETA = 3
-    MINIMAX3D = 4
+    RANDOM : 0 = 'random'
+    HUMAN : 1 = 'human'
+    MINIMAX : 2 = 'minimax'
+    MINIMAX_ALPHA_BETA : 3 = 'minimax_ab'
+    MINIMAX3D : 4 = 'minimax3d'
 
 ### Example 
 
 ```
-  $ python3 tictactoe_interactive 1 1                   (1)
-  $ python3 tictactoe_interactive 0 2  -s=1000 -t=2     (2)
-  $ python3 tictactoe_interactive 4 4  -d=True -b=4     (3)
+  $ python3 tictactoe_interactive 1 1                         (1)
+  $ python3 tictactoe_interactive 0 2  -s=1000 -t=2           (2)
+  $ python3 tictactoe_interactive 4 4  -d=True -b=4           (3)
+  $ python3 tictactoe_interactive human random  -d=True       (4)
 ```
 
 - (1) is a regular tic-tac-toe game, where two human players play against each other
 - (2) simulates 100 games on 2 threads (50 on each thread) where the first player is the random player and the second is the minimax algorithm
 - (3) lets two minimax3D-Algrithms play against each other on a $4\times 4\times 4$ baord
+- (4) is a 3d-game where the first player is human and the second player is random
 
 ### verbosity
 The  verbosity and its effect differ, depending on if you are simulating games or not.
@@ -55,39 +55,21 @@ The  verbosity and its effect differ, depending on if you are simulating games o
 |2| minimax (regular and alpha beta pruning) prints out its move evaluation for depth 0 |
 |3| minimax3d prints out evaluation for every baord |
 
-### tic-tac-toe in 3d
-The game is easily won by the first player if you play on a $3 \times 3 \times 3$, by just placing the first token in the center. <br>
-Thats why tic-tac-toe in 3d if most regularly played on a $4 \times 4 \times 4$ board.
+## tic-tac-toe in 3d
+The game is easily won by the first player if you play on a $3 \times 3 \times 3$, by just placing the first token in the center. 
+Thats why tic-tac-toe in 3d if most regularly played on a $4 \times 4 \times 4$ board. <br>
+
+## Minimax on an $n \times n \times n$ board
+Anyway, the real challenge is to write a version of the minimax algroithm which is able to play tic-tac-toe in three dimensions.
+### The brute force method
+brute force soloutions would work by just giving the algorithm every empty cell in the tic-tac-toe cube as a possible square to move on. However the exploration tree would become so huge that this is really not a feasable solution (it would just take too long to find an answer).
+
+### currect idea
+In the following i assume that $n$ is even.
+My current idea, and the way the minimax3d algorithm currently works, is by slicing the cube into $2n$ 2d-boards. These boards contain all possible diagonals, rows and columns that on which a player could win the game. <br>
+The idea now is to evaluate every 2d-board with the minimax algorithm and find the best move over all boards. <br>
+Problem : is that a board that is about to be lost has a realtively high (or low) score (for the opponent), compared to a board that is winnable. This way the  algorithm perfers making a move that would eventually win the game over making a move that would keep it from losing the game.
 
 
-## Winner detection in 3d
-
-My idea was to rotate the entire $n \times n\times n$ cube, slice it into $n$ planes two times and check $n$ $n \times n$ boards. 
 
 
-
-
-
-## Board
-The board class is a wrapper class for the game-board. The board is initiallized with the `side_length` of the board and weather the board is $3\text{D}$ or not. Additionally you can give an `init_board` array to the baord-class, so the internal board will be initialized with that. This option however is only recommended for 2d-boards, as the rotated cube would not be up to date with the given board. (I did not implement this.)
-
-### Functions
-All functions work the same, independent of the board being $3\text{D}$ or $2\text{D}$.
-- `hasWinner()` : which returns 0 if not and [-1, 1] if anyone of those has won 
-- `hasMoves()` : False/True
-- `getPossibleMoves()` : list of (move)-touples
-- `doMove(move, player)` : places the player icon on the board
-- `undoMove(move)` : marks the move as empty
-
-In all cases is `move` a touple (depending on the dimension of the board eiter 2 or 3 entries) that specifies the indexes of the cell you want to place a move into. <br>
-
-$3\text{D}$-only functions : 
-- `getSlice(plane_index, rotated, angled)` : this functoin returns a $2\text{D}$-plane that is sliced out of the $3\text{D}$ cube. Each plane represents a $n \times n$ tic-tac-toe board.
-  - `plane_index` : is between $[0, n-1]$ and specifies the planewhen looking directly at the cube
-  - `rotated` : is a boolean, that specifies weathe the plane is sliced out of the regular cube (rotated == false) or out of the rotated cube 
-  - `angled` :  is either [-1, 0, 1]. [1, -1] if the plane is rotated by 45°, or -45°. Can only be true, if $n$ is odd (so if there is a distinct center cell) and `plane_index` describes the plane in which that center cell lies. Put 0 if you do not want to
-- `getAllSlices()` : returns an array of all possible slices of the cube. The first $n$ slices in the array are from the forward facing cube. The next $n$ slices are from the rotated cube.
-
-These funcions do not fail in 2d, however, they just return the regular board on every call - no matter the parameters.
-
-### Rotated copy
