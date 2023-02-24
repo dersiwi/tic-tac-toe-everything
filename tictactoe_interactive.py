@@ -46,7 +46,7 @@ def mainWithArgparse(argv):
     parser.add_argument('-v', '--verbosity', help="System verbosity", default=Constants.DEFAULT_VERBOSITY)
 
     parser.add_argument('-s', '--simulate', help="Simulate the given number of games", type=int)
-    parser.add_argument('-t', '--threads', help="Amount of simulation threads", type=int, default=1)
+    parser.add_argument('-t', '--threads', help="Amount of simulation threads", type=int, default=Constants.DEFAULT_AMOUNT_THREADS)
     parser.add_argument('playertype', nargs=2, type=int, help=playertype_helpstring, default=[0,1])#nargs='*' for any number of args
 
     args = parser.parse_args()
@@ -57,7 +57,7 @@ def mainWithArgparse(argv):
     pOne = Player(type=playertypes[0], playerIndex= 1)
     pTwo = Player(type=playertypes[1], playerIndex= -1)
 
-
+    
     if not args.simulate:
         playGame(playerOne = pOne,
                 playerTwo = pTwo,

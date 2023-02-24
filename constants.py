@@ -3,13 +3,10 @@
 class Constants:
     DEFAULT_BOARD_SIZE = 3
     DEFAULT_THREE_D = False
-
-    DEFAULT_VERBOSITY = 0
-
+    DEFAULT_VERBOSITY = 1
+    DEFAULT_AMOUNT_THREADS = 1
     SYSTEM_VERBOSITY = 0
-
     PRINT_BOARD_AFTER_EVERY_MOVE = True
-
     isSimulating = False
 
 

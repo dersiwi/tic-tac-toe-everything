@@ -35,8 +35,10 @@ def playerMove(player, board):
         board.printBoard()
         print("")
 
-def playGame(playerOne = Player(type=Player.RANDOM, playerIndex= 1), 
-         playerTwo = Player(type=Player.MINIMAX_ALPHA_BETA, playerIndex = -1),
+"""
+payerOne and playerTwo are both player obecjts.
+"""
+def playGame(playerOne, playerTwo, 
          boardsize = Constants.DEFAULT_BOARD_SIZE,
          threed = Constants.DEFAULT_THREE_D):
     
@@ -61,9 +63,9 @@ def playGame(playerOne = Player(type=Player.RANDOM, playerIndex= 1),
             
         elif (winner == 1):
             
-            print("{0} has won!".format(playerOne.getName()))
+            print("{0} has won!".format(playerOne.getUniqueName()))
         else:
-            print("{0} has won!".format(playerTwo.getName()))
+            print("{0} has won!".format(playerTwo.getUniqueName()))
 
     return winner
 #playGame(doMinimaxAlphaBetaPlayerMove, doMinimaxAlphaBetaPlayerMove, board)

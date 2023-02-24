@@ -33,7 +33,7 @@ def doHumanPlayerMove(player, board):
             print("Cannot move to given cell, because its not empty.")
             doHumanPlayerMove(player, board)
 
-        board.doMove(player, move)
+        board.doMove(move, player)
     except:
         print("Given index was probably out of bounds.")
         doHumanPlayerMove(player, board)
@@ -55,6 +55,10 @@ class Player:
             name = "Random_player"
             playerFunction = doRandomPlayerMove
 
+        elif type == Player.HUMAN:
+            name = "Human_player"
+            playerFunction = doHumanPlayerMove
+
         elif type == Player.MINIMAX or type == Player.MINIMAX_ALPHA_BETA or Player.MINIMAX3D:
             name = "Minimax_player"
             if type == Player.MINIMAX:
@@ -66,9 +70,7 @@ class Player:
                 playerFunction = doMinimaxAlphaBetaPlayerMove
                 name += "+alphaBeta"
 
-        elif type == Player.HUMAN:
-            name = "Human_player"
-            playerFunction = doHumanPlayerMove
+        
         return name + index, playerFunction
 
 
