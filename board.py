@@ -6,17 +6,28 @@ class Board:
 
     EMPTY = 0
 
-    def __init__(self, side_length, three_d=False):
+    def __init__(self, side_length, three_d=False, initBoard=None):
+        if (three_d and initBoard != None):
+            raise NotImplementedError("Cannot give initial 3d board. Only 2d.")
+        
         self.side_length = side_length
         self.three_d = three_d
 
         #fields for board
         self.board = []
         self.rotatedBoard = []
-        self.rotatedDict = {}
+        self.rotatedDict = {}   #(i,j,k) : (i', j', k')
+        self.inversedRotationDict = {}  #(i', j', k') : (i,j,k) 
         self.emptyFields = []
-        self.initBoardFields()
-
+        if initBoard == None:
+            self.initBoardFields()
+        else:
+            self.board = initBoard
+            for i in range(len(self.board)):
+                for j in range(len(self.board[i])):
+                    if self.board[i][j] == Board.EMPTY:
+                        self.emptyFields.append((i, j))
+            
 
     def initBoardFields(self):
 
@@ -81,9 +92,10 @@ class Board:
                     #shift the point back as if it was rotated around the axis of the cubes center
                     #in case of odd dimensions (e.g. 3, all points besides)
                     translatedPoint = np.floor(rotated_cell + translation_vector)
-
-                    self.rotatedDict[(i,j,k)] = (int(translatedPoint[0]),int(translatedPoint[1]), int(translatedPoint[2]))
+                    rotated_cell_coordinates = (int(translatedPoint[0]),int(translatedPoint[1]), int(translatedPoint[2]))
+                    self.rotatedDict[(i,j,k)] = rotated_cell_coordinates
                     #self.rotatedDict[(i,j,k)] = (translatedPoint[0] , translatedPoint[1],  translatedPoint[2])
+                    self.inversedRotationDict[rotated_cell_coordinates] = (i,j,k)
 
 
     def loopOverBoard(self, function):
@@ -204,6 +216,12 @@ class Board:
     def undoMove(self, move):
         self.setIcon(Board.EMPTY, move)
         self.emptyFields.append(move)
+    
+    def isEmptyAt(self, cell):
+        if self.three_d:
+            return self.board[cell[0]][cell[1]][cell[2]] == Board.EMPTY
+        else:
+            return self.board[cell[0]][cell[1]] == Board.EMPTY
 
     def printBoard(self):
         
@@ -257,13 +275,9 @@ class Board:
         slices = []
         for i in range(self.side_length):
             slices.append(self.getSlice(i, rotated=False))
+        for i in range(self.side_length):
             slices.append(self.getSlice(i, rotated=True))
 
         #rotated slices not implemented yet
         return slices
 
-b = Board(side_length=3, three_d=True)
-b.doMove((0,0,0), 1)
-board_array = b.getAllSlices()
-board_array[0] = [12]
-b.printBoard()

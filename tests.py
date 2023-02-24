@@ -16,7 +16,7 @@ class BoardTests(unittest.TestCase):
                    [(2,0), (1,1), (0,2)]]
         for moves in moveset:
             for move in moves:
-                BoardTests.twod_board.doMove(player, move)
+                BoardTests.twod_board.doMove(move, player)
             self.assertEqual(BoardTests.twod_board.hasWinner(), player)
 
             BoardTests.twod_board.resetBoard()
@@ -31,7 +31,7 @@ class BoardTests(unittest.TestCase):
                     [(0, 0, 0), (1, 1, 1), (2, 2, 2)]]
         for moves in moveset:
             for move in moves:
-                BoardTests.threed_board.doMove(player, move)
+                BoardTests.threed_board.doMove(move, player)
 
             print("")
             BoardTests.threed_board.printBoard()
@@ -43,3 +43,4 @@ class BoardTests(unittest.TestCase):
     if __name__ == '__main__':
         unittest.main()
         
+
