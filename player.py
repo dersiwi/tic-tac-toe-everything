@@ -1,4 +1,3 @@
-from tictactoe import doMinimaxPlayerMove, doRandomPlayerMove, doMinimaxAlphaBetaPlayerMove, doHumanPlayerMove
 from minimax import minimaxAlphaBeta, minimax3d, minimax
 import math, random
 
@@ -47,6 +46,8 @@ class Player:
     MINIMAX_ALPHA_BETA = 3
     MINIMAX3D = 4
 
+    AMOUNT_PLAYERS = 0
+
     def setup(type, index=""):
         name = ""
         playerFunction = None
@@ -77,12 +78,17 @@ class Player:
         #initialize variables
         self.name, self.playerFunction = Player.setup(type, name_addon)
         self.playerIndex = playerIndex
+        self.player_number = Player.AMOUNT_PLAYERS
+        Player.AMOUNT_PLAYERS += 1
 
     def doMove(self, board):
         self.playerFunction(self.playerIndex, board)
 
     def getName(self):
         return self.name
+    
+    def getUniqueName(self):
+        return self.name + str(self.player_number)
 
 
 player = Player(Player.MINIMAX, "#1")

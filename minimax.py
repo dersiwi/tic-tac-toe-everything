@@ -1,10 +1,9 @@
 from board import Board
 import math
+from constants import printToUser, isAllowedToPrint
 
 MAX_DEPTH = 10
 WIN_REWARD = MAX_DEPTH + 1
-PRINT_MOVE_EVALUATION = True
-PRINT_DEPTH = 0
 
 transposition_table = {} #position : vallue by minimax
 """
@@ -51,8 +50,8 @@ def minimax(player, depth, board):
         board.doMove(move, player)            
         moveEval = minimax((-1) * player, depth + 1, board)
 
-        if (depth == 0) and PRINT_MOVE_EVALUATION:
-            print(str(move) + " : " + str(moveEval))
+        if (depth == 0):
+            printToUser(str(move) + " : " + str(moveEval), message_verbosity=2, msgWhenSimulating=False)
 
         #undo move
         board.undoMove(move)
@@ -92,9 +91,9 @@ def minimaxAlphaBeta(player, depth, board, alpha, beta):
             else:
                 moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
 
-            if (depth == PRINT_DEPTH) and PRINT_MOVE_EVALUATION:
-                print(str(move) + " : " + str(moveEval))
-                
+            if (depth == 0):
+                printToUser(str(move) + " : " + str(moveEval), message_verbosity=2, msgWhenSimulating=False)
+
             board.undoMove(move)
 
             #if move was better then the previous best move, update
@@ -128,8 +127,11 @@ def minimax3d(player, board):
         for index ,twodBoard in enumerate(boards):
             twodBoard = Board(side_length=board.side_length, three_d=False, initBoard=twodBoard)
             twodMoves = twodBoard.getPossibleMoves()
-            print("")
-            twodBoard.printBoard()
+
+            if isAllowedToPrint(message_verbosity=3, msgWhenSimulating=False):
+                print("")
+                twodBoard.printBoard()
+                
             bestBoardEval = (-1) * player * math.inf
             bestBoardMove = 0 
             for twodMove in twodMoves:
@@ -147,12 +149,16 @@ def minimax3d(player, board):
                     if (moveEval > bestBoardEval):
                         bestBoardEval = moveEval
                         bestBoardMove = twodMove
-            print("best move on this board : {0}, eval : {1}. Current best eval : {2}\n".format(bestBoardMove, bestBoardEval, best_eval))
+            printToUser(
+                "best move on this board : {0}, eval : {1}. Current best eval : {2}\n".format(bestBoardMove, bestBoardEval, best_eval),
+                message_verbosity=3,
+                msgWhenSimulating=False
+            )
                         
             
             if (player == -1):
                 #minimize
-                bestBoardEval *= (-1)
+                
                 if (bestBoardEval < best_eval):
                     best_eval = bestBoardEval
                     moveWithGreatestEval = bestBoardMove
@@ -164,8 +170,13 @@ def minimax3d(player, board):
                     moveWithGreatestEval = bestBoardMove
                     slice_index = index
 
-        #translate 2d move into 3d move
+
+        #if for some reason the algorithm has tow work on a 2d board
+        if not board.three_d:
+            board.doMove(moveWithGreatestEval, player)
+            return
         
+        #translate 2d move into 3d move
         if slice_index < board.side_length:
             threedmove = (slice_index, moveWithGreatestEval[0], moveWithGreatestEval[1])
             board.doMove(threedmove, player)
@@ -174,43 +185,3 @@ def minimax3d(player, board):
             board.doMove(board.inversedRotationDict[threedmove], player)
 
         
-                
-
-
-
-"""def play():
-    player = 1
-    board = Board(side_length=3, three_d=True)
-    while(board.hasMoves() and board.hasWinner() == 0):
-        #minimax(player, 0)
-        minimax3d(player, board)
-        board.printBoard()
-        print("")
-        player = (-1)*player
-        continue
-
-play()"""
-
-def doHumanPlayerMove(player, board):
-    print(board.getPossibleMoves())
-    move_x = int(input("Your move x : "))
-    move_y = int(input("Your move y : "))
-
-    board.doMove((move_x, move_y), player)
-
-def play():
-    player = 1
-    board = Board(side_length=3, three_d=False)
-    while(board.hasMoves() and board.hasWinner() == 0):
-        #minimax(player, 0)
-        if player == 1:
-            minimaxAlphaBeta(player, 0, board, -math.inf, math.inf)
-            
-        else:
-            doHumanPlayerMove(player, board)
-        board.printBoard()
-        print("")
-        player = (-1)*player
-        continue
-
-#play()
