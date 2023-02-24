@@ -10,7 +10,7 @@ The real challenge is to write a fast enough algorithm for 3d tic-tac-toe.
 
 |Parameter | Explanation | Type | Default 
 |:--:|:--|:--:|:--:|
-|[playertype] | Type of players that play agains each other <br> first playertype is also player one | Integer | 0
+|[playertype] | Type of players that play agains each other <br> first playertype is also player one | Integer <br> or String| 0
 |-b, --board_size | Specifies the side-length of the board | Integer | 3
 |-d, --three_d | If the game is 3D or not | bool | False
 |-v, --verbosity | Specifies the amount of messages | Integer | 1
@@ -28,10 +28,10 @@ The real challenge is to write a fast enough algorithm for 3d tic-tac-toe.
 ### Example 
 
 ```
-  $ python3 tictactoe_interactive 1 1                         (1)
-  $ python3 tictactoe_interactive 0 2  -s=1000 -t=2           (2)
-  $ python3 tictactoe_interactive 4 4  -d=True -b=4           (3)
-  $ python3 tictactoe_interactive human random  -d=True       (4)
+  $ python3 tictactoe_interactive.py 1 1                         (1)
+  $ python3 tictactoe_interactive.py 0 2  -s=1000 -t=2           (2)
+  $ python3 tictactoe_interactive.py 4 4  -d=True -b=4           (3)
+  $ python3 tictactoe_interactive.py human random  -d=True       (4)
 ```
 
 - (1) is a regular tic-tac-toe game, where two human players play against each other
@@ -64,9 +64,9 @@ Anyway, the real challenge is to write a version of the minimax algroithm which 
 ### The brute force method
 brute force soloutions would work by just giving the algorithm every empty cell in the tic-tac-toe cube as a possible square to move on. However the exploration tree would become so huge that this is really not a feasable solution (it would just take too long to find an answer).
 
-### currect idea
+### Currect idea
 In the following i assume that $n$ is even.
-My current idea, and the way the minimax3d algorithm currently works, is by slicing the cube into $2n$ 2d-boards. These boards contain all possible diagonals, rows and columns that on which a player could win the game. <br>
+My current idea, and the way the minimax3d algorithm currently works, is by slicing the cube into $2n$ 2d-boards ($n\times n$). These boards contain all possible diagonals, rows and columns that on which a player could win the game. <br>
 The idea now is to evaluate every 2d-board with the minimax algorithm and find the best move over all boards. <br>
 Problem : is that a board that is about to be lost has a realtively high (or low) score (for the opponent), compared to a board that is winnable. This way the  algorithm perfers making a move that would eventually win the game over making a move that would keep it from losing the game.
 
