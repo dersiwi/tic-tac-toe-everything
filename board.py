@@ -41,6 +41,7 @@ class Board:
 
         if self.three_d:
             self.rotatedDict = {}
+            self.inversedRotationDict = {}
             self.calculateRotatedCellCoordinates()
 
         self.emptyFields = [] #todo : initialize correctly
@@ -68,14 +69,20 @@ class Board:
                 self.board.append([Board.EMPTY for j in range(self.side_length)])
 
     def calculateRotatedCellCoordinates(self):
+        """
+        When we look at the array as each index (i,j,k) were coordinates, every cell in the array corresponds to a single 
+        point in a coordiante system. And the cube itself has only length (self.side_lengt - 1).
+        """
         translation_vector = np.array([
-            math.floor(self.side_length) / 2, 0, math.floor(self.side_length / 2)
+            (self.side_length-1) / 2, 0, (self.side_length-1) / 2   
         ])
         rotation_matrix = np.array([
             [0,0,1],
             [0,1,0],
             [-1,0,0]
         ])  #rotation matrix for rotation around y-axis with 90°
+
+
         
 
         for i in range(len(self.board)):
@@ -85,7 +92,6 @@ class Board:
                     cell = np.array([i,j,k])
                     #shifting the cell in the xz-plane, such that the y-axis is the center of the cube 
                     shifted_cell = cell - translation_vector
-
                     #rotate the cell around the y-axis
                     rotated_cell = np.dot(rotation_matrix, shifted_cell)
                     
@@ -280,4 +286,10 @@ class Board:
 
         #rotated slices not implemented yet
         return slices
+    
+    def getTouple(self):
+        if self.three_d:
+            pass
+        else:
+            return tuple(map(tuple, self.board.copy()))
 
