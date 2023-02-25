@@ -4,8 +4,10 @@ from constants import printToUser, isAllowedToPrint
 
 MAX_DEPTH = 10
 WIN_REWARD = MAX_DEPTH + 1
+transposition_table_one = {}    #holds boards and best moves for player one
+transposition_table_two = {}    #holds boards and best moves for player two
+[transposition_table_one, transposition_table_two] #boardTuple : (bestMoveEval, bestMove)
 
-transposition_table = {} #position : vallue by minimax
 """
 position : vallue by minimax
 
@@ -118,44 +120,60 @@ def minimaxAlphaBeta(player, depth, board, alpha, beta):
 
 
 def minimax3d(player, board):
+        global transposition_table_one, transposition_table_two
+
         best_eval = (-1) * player * math.inf   
         moveWithGreatestEval = 0
         slice_index = 0 #needed for converting 2d move into 3d move 
         boards = board.getAllSlices()
 
+        transposition_table = transposition_table_one if player == 1 else transposition_table_two
+
         #get the best move over all two-d boards 
         for index ,twodBoard in enumerate(boards):
             twodBoard = Board(side_length=board.side_length, three_d=False, initBoard=twodBoard)
-            twodMoves = twodBoard.getPossibleMoves()
 
-            if isAllowedToPrint(message_verbosity=3, msgWhenSimulating=False):
-                print("")
-                twodBoard.printBoard()
-                
-            bestBoardEval = (-1) * player * math.inf
-            bestBoardMove = 0 
-            for twodMove in twodMoves:
-                twodBoard.doMove(twodMove, player)
-                moveEval = minimaxAlphaBeta(player *(-1), 1, twodBoard, -math.inf, math.inf)
-                twodBoard.undoMove(twodMove)
+            #check if the board was already evaluated 
+            boardTuple = twodBoard.getTouple()
+            if boardTuple in transposition_table:
+                bestBoardEval = transposition_table[boardTuple][0]
+                bestBoardMove = transposition_table[boardTuple][1]
+            else:
+                #actually find the best move on this board
+                twodMoves = twodBoard.getPossibleMoves()
 
-                if (player == -1):
-                    #minimize
-                    if (moveEval < bestBoardEval):
-                        bestBoardEval = moveEval
-                        bestBoardMove = twodMove
-                else:
-                    #maximize
-                    if (moveEval > bestBoardEval):
-                        bestBoardEval = moveEval
-                        bestBoardMove = twodMove
+                if isAllowedToPrint(message_verbosity=3, msgWhenSimulating=False):
+                    print("")
+                    twodBoard.printBoard()
+                    
+                bestBoardEval = (-1) * player * math.inf
+                bestBoardMove = 0 
+                for twodMove in twodMoves:
+                    twodBoard.doMove(twodMove, player)
+                    moveEval = minimaxAlphaBeta(player *(-1), 1, twodBoard, -math.inf, math.inf)
+                    twodBoard.undoMove(twodMove)
+
+                    if (player == -1):
+                        #minimize
+                        if (moveEval < bestBoardEval):
+                            bestBoardEval = moveEval
+                            bestBoardMove = twodMove
+                    else:
+                        #maximize
+                        if (moveEval > bestBoardEval):
+                            bestBoardEval = moveEval
+                            bestBoardMove = twodMove
+                transposition_table[boardTuple] = (bestBoardEval, bestBoardMove)
             printToUser(
                 "best move on this board : {0}, eval : {1}. Current best eval : {2}\n".format(bestBoardMove, bestBoardEval, best_eval),
                 message_verbosity=3,
                 msgWhenSimulating=False
             )
                         
-            
+            if abs(bestBoardEval) > abs(best_eval):
+                #force the algorithm to prevent a loss, rather than promote a win (if the lost is more immenent then the win)
+                bestBoardEval *= (-1)
+
             if (player == -1):
                 #minimize
                 

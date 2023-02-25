@@ -70,6 +70,23 @@ My current idea, and the way the minimax3d algorithm currently works, is by slic
 The idea now is to evaluate every 2d-board with the minimax algorithm and find the best move over all boards. <br>
 Problem : is that a board that is about to be lost has a realtively high (or low) score (for the opponent), compared to a board that is winnable. This way the  algorithm perfers making a move that would eventually win the game over making a move that would keep it from losing the game.
 
+```
+
+#pseudocode, very simplified 
+
+def minimax3d:
+    boards = getAll2dBoards()
+    overall_best_move = None
+
+    for board in boards:
+        move = best move f or board using minimax
+        if move is better than overall_best_move:
+            overall_best_move = move
+    
+    board.doMove(overall_best_move)
+
+```
+
 
 
 
