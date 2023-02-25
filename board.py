@@ -137,7 +137,8 @@ class Board:
 
         if self.three_d:
 
-            for plane, planeRotated in zip(self.board, self.rotatedBoard):
+            """
+                for plane, planeRotated in zip(self.board, self.rotatedBoard):
                 winner = self.check2dBoard_forWinner(plane)
                 winner_r = self.check2dBoard_forWinner(planeRotated)
                 if (winner != 0):
@@ -157,7 +158,13 @@ class Board:
                 
                 for diagsum in diagsums:
                     if (abs(diagsum) == self.side_length):
-                        return int(diagsum / self.side_length)
+                        return int(diagsum / self.side_length)"""
+            allSlices = self.getAllSlices()
+            for slice in allSlices:
+                winner = self.check2dBoard_forWinner(slice)
+                if (winner != 0):
+                    return winner
+
             return 0
 
             
@@ -267,12 +274,30 @@ class Board:
         if not self.three_d:
             return self.board.copy()
         
+        if angled == 1:
+            #angled is ignored until now
+            angledBoard = []
+            for i in range(self.side_length):
+                angledRow = []
+                for j in range(self.side_length):
+                    angledRow.append(self.board[i][j][j])
+                angledBoard.append(angledRow)
+            return angledBoard
+        if angled == 2:
+            angledBoard = []
+            for i in range(self.side_length):
+                angledRow = []
+                for j in range(self.side_length):
+                    angledRow.append(self.board[i][self.side_length - 1 - j][j])
+                angledBoard.append(angledRow)
+            return angledBoard
+            
+
         #3d case
         if not rotated:
             return self.board[plane_index].copy()
         else:
             return self.rotatedBoard[plane_index].copy()
-        #angled is ignored until now
 
     def getAllSlices(self):
         if not self.three_d:
@@ -284,10 +309,13 @@ class Board:
         for i in range(self.side_length):
             slices.append(self.getSlice(i, rotated=True))
 
-        #rotated slices not implemented yet
+        #rotated slices not implemented yet, even if self.side_length not odd, there have to be two
+        #boards for cube diagonals
+        slices.append(self.getSlice(0, rotated=False, angled=1))    #no other parametrs matter if angled != 0
+        slices.append(self.getSlice(0, rotated=False, angled=2))
         return slices
     
-    def getTouple(self):
+    def getTuple(self):
         if self.three_d:
             pass
         else:

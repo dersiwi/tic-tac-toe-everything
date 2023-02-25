@@ -62,6 +62,8 @@ def mainWithArgparse(argv):
     parser.add_argument('-b', '--board_size', help="board size", type=int, default=Constants.DEFAULT_BOARD_SIZE)
     parser.add_argument('-d', '--three_d', help="Boolean if board is 3d", type=bool, default=Constants.DEFAULT_THREE_D)
 
+    parser.add_argument('-m', '--m_depth', help="Set depth for minimax algorithm", type=int, default=Constants.MAX_DEPTH)
+
     parser.add_argument('-v', '--verbosity', help="System verbosity", default=Constants.DEFAULT_VERBOSITY)
 
     parser.add_argument('-s', '--simulate', help="Simulate the given number of games", type=int)
@@ -72,6 +74,7 @@ def mainWithArgparse(argv):
 
     playertypes = parseTypes(args.playertype)
     Constants.SYSTEM_VERBOSITY = int(args.verbosity)
+    Constants.MAX_DEPTH = int(args.m_depth)
     pOne = Player(type=playertypes[0], playerIndex= 1)
     pTwo = Player(type=playertypes[1], playerIndex= -1)
 

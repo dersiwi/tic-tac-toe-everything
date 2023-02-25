@@ -1,13 +1,13 @@
 from board import Board
 import math
+from constants import Constants 
 from constants import printToUser, isAllowedToPrint
 
-MAX_DEPTH = 10
-WIN_REWARD = MAX_DEPTH + 1
+
 transposition_table_one = {}    #holds boards and best moves for player one
 transposition_table_two = {}    #holds boards and best moves for player two
 [transposition_table_one, transposition_table_two] #boardTuple : (bestMoveEval, bestMove)
-
+transposition_hits = 0
 """
 position : vallue by minimax
 
@@ -34,12 +34,12 @@ def evaluate(depth, winner):
     if (winner == 0):
         return 0
     #in case of winner ==1 returns 10 - depth, in case of -1 : -10+depth
-    return winner * WIN_REWARD - winner * depth 
+    return winner * Constants.WIN_REWARD - winner * depth 
 
 
 def minimax(player, depth, board):
     winner = board.hasWinner()
-    if (depth >= MAX_DEPTH or not board.hasMoves() or winner != 0):
+    if (depth >= Constants.MAX_DEPTH or not board.hasMoves() or winner != 0):
         return evaluate(depth, winner)
     
      #-inf if player is 1, inf if player is -1
@@ -53,7 +53,7 @@ def minimax(player, depth, board):
         moveEval = minimax((-1) * player, depth + 1, board)
 
         if (depth == 0):
-            printToUser(str(move) + " : " + str(moveEval), message_verbosity=2, msgWhenSimulating=False)
+            printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
 
         #undo move
         board.undoMove(move)
@@ -76,45 +76,55 @@ def minimax(player, depth, board):
     return best_eval
 
 
-def minimaxAlphaBeta(player, depth, board, alpha, beta):
+def minimaxAlphaBeta(player, depth, board, alpha, beta, doMove=True):
+        global transposition_hits
         winner = board.hasWinner()
-        if (depth >= MAX_DEPTH or not board.hasMoves() or winner != 0):
+        if (depth >= Constants.MAX_DEPTH or not board.hasMoves() or winner != 0):
             return evaluate(depth, winner)
 
         best_eval = (-1) * player * math.inf   
         moveWithGreatestEval = 0
         moves = board.getPossibleMoves()
+        transition_table = transposition_table_one if player == 1 else transposition_table_two
+        if board.getTuple() in transition_table:
+            tranisition_table_eval = transition_table[board.getTuple()]
+            best_eval = tranisition_table_eval[0]
+            moveWithGreatestEval = tranisition_table_eval[1]
+            transposition_hits += 1
+        else:
 
-        for move in moves:
-            #do move and get evaluation of move, thinking the opponent plays optimally
-            board.doMove(move, player)
-            if (player == -1):         
-                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, alpha, best_eval)
-            else:
-                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
+            for move in moves:
+                #do move and get evaluation of move, thinking the opponent plays optimally
+                board.doMove(move, player)
+                if (player == -1):         
+                    moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, alpha, best_eval)
+                else:
+                    moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
 
-            if (depth == 0):
-                printToUser(str(move) + " : " + str(moveEval), message_verbosity=2, msgWhenSimulating=False)
+                if (depth == 0):
+                    printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
 
-            board.undoMove(move)
+                board.undoMove(move)
 
-            #if move was better then the previous best move, update
-            if (player == -1):
-                #minimize
-                if (moveEval < best_eval):
-                    best_eval = moveEval
-                    moveWithGreatestEval = move
-                if (best_eval <= alpha):
-                    break
-            else:
-                #maximize
-                if (moveEval > best_eval):
-                    best_eval = moveEval
-                    moveWithGreatestEval = move
-                if (best_eval >= beta):
-                    break
+                #if move was better then the previous best move, update
+                if (player == -1):
+                    #minimize
+                    if (moveEval < best_eval):
+                        best_eval = moveEval
+                        moveWithGreatestEval = move
+                    if (best_eval <= alpha):
+                        break
+                else:
+                    #maximize
+                    if (moveEval > best_eval):
+                        best_eval = moveEval
+                        moveWithGreatestEval = move
+                    if (best_eval >= beta):
+                        break
+            #add move to transposition table
+            transition_table[board.getTuple()] = (best_eval, moveWithGreatestEval)
 
-        if (depth == 0):
+        if (depth == 0 and doMove):
             board.doMove(moveWithGreatestEval, player)
         return best_eval
 
@@ -134,15 +144,15 @@ def minimax3d(player, board):
             twodBoard = Board(side_length=board.side_length, three_d=False, initBoard=twodBoard)
 
             #check if the board was already evaluated 
-            boardTuple = twodBoard.getTouple()
+            boardTuple = twodBoard.getTuple()
             if boardTuple in transposition_table:
                 bestBoardEval = transposition_table[boardTuple][0]
                 bestBoardMove = transposition_table[boardTuple][1]
             else:
-                #actually find the best move on this board
+                #actually find the best move on this board, if board was not already evaluated
                 twodMoves = twodBoard.getPossibleMoves()
 
-                if isAllowedToPrint(message_verbosity=3, msgWhenSimulating=False):
+                if isAllowedToPrint(message_verbosity=2, msgWhenSimulating=False):
                     print("")
                     twodBoard.printBoard()
                     
@@ -150,7 +160,7 @@ def minimax3d(player, board):
                 bestBoardMove = 0 
                 for twodMove in twodMoves:
                     twodBoard.doMove(twodMove, player)
-                    moveEval = minimaxAlphaBeta(player *(-1), 1, twodBoard, -math.inf, math.inf)
+                    moveEval = minimaxAlphaBeta(player *(-1), 0, twodBoard, -math.inf, math.inf, doMove=False)
                     twodBoard.undoMove(twodMove)
 
                     if (player == -1):
@@ -163,10 +173,12 @@ def minimax3d(player, board):
                         if (moveEval > bestBoardEval):
                             bestBoardEval = moveEval
                             bestBoardMove = twodMove
+
+                #add board to transpo table
                 transposition_table[boardTuple] = (bestBoardEval, bestBoardMove)
             printToUser(
                 "best move on this board : {0}, eval : {1}. Current best eval : {2}\n".format(bestBoardMove, bestBoardEval, best_eval),
-                message_verbosity=3,
+                message_verbosity=2,
                 msgWhenSimulating=False
             )
                         
@@ -194,12 +206,38 @@ def minimax3d(player, board):
             board.doMove(moveWithGreatestEval, player)
             return
         
-        #translate 2d move into 3d move
+        #translate moveWithGreatestEval (2d move) into 3d move
         if slice_index < board.side_length:
             threedmove = (slice_index, moveWithGreatestEval[0], moveWithGreatestEval[1])
             board.doMove(threedmove, player)
-        else:
+            return
+        elif slice_index < board.side_length * 2:
             threedmove = (slice_index - board.side_length, moveWithGreatestEval[0], moveWithGreatestEval[1])
             board.doMove(board.inversedRotationDict[threedmove], player)
+            return
+        elif slice_index == board.side_length*2:
+            #first rotated board
+            """
+            actual 3d coordiantes of the board in question 3x3 example:
+                (0,0,0)  |  (0,1,1)  |  (0,2,2) 
+                (1,0,0)  |  (1,1,1)  |  (1,2,2)  
+                (2,0,0)  |  (2,1,1)  |  (2,2,2)
+            """
+            threedmove = (moveWithGreatestEval[0], moveWithGreatestEval[1], moveWithGreatestEval[1])
+            board.doMove(threedmove, player)
+            return
+        elif slice_index == board.side_length*2+1:
+            #second rotated board
+            """
+            actual 3d coordiantes of the board in question 3x3 example:
+                (0,2,0)  |  (0,1,1)  |  (0,0,2) 
+                (1,2,0)  |  (1,1,1)  |  (1,0,2)  
+                (2,2,0)  |  (2,1,0)  |  (2,0,2)
+            (x,y) -> (i,j,k) = (x, side_length - y ,y)
+            """
+            threedmove = (moveWithGreatestEval[0], (board.side_length - 1) -moveWithGreatestEval[1], moveWithGreatestEval[1])
+            board.doMove(threedmove, player)
+            return
+
 
         

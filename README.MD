@@ -13,6 +13,7 @@ The real challenge is to write a fast enough algorithm for 3d tic-tac-toe.
 |[playertype] | Type of players that play agains each other <br> first playertype is also player one | Integer <br> or String| 0
 |-b, --board_size | Specifies the side-length of the board | Integer | 3
 |-d, --three_d | If the game is 3D or not | bool | False
+|-m, --m_depth | Sets maximal depth for minimax algoithm | int | 16
 |-v, --verbosity | Specifies the amount of messages | Integer | 1
 |-s, --simulate| Tells the program to simulate <br>a game between the two given players<br> the amount of specified times | Integer | -
 |-t, --threads | Spcifies the amout of threads <br> when simulating | Integer | 1
@@ -52,12 +53,15 @@ The  verbosity and its effect differ, depending on if you are simulating games o
 |:-:|:-|
 |0| Print who is playing against who and the game-outcome|
 |1| Print board after each move |
-|2| minimax (regular and alpha beta pruning) prints out its move evaluation for depth 0 |
-|3| minimax3d prints out evaluation for every baord |
+|2| minimax3d prints out evaluation for every baord |
+|3| minimax (regular and alpha beta pruning) prints out its move evaluation for depth 0 |
+
+So if you want to get the best move or evaluation for each board of the 3d-algorithm, minimax does not print 
+the evaluation of every move.
 
 ## tic-tac-toe in 3d
-The game is easily won by the first player if you play on a $3 \times 3 \times 3$, by just placing the first token in the center. 
-Thats why tic-tac-toe in 3d if most regularly played on a $4 \times 4 \times 4$ board. <br>
+The game is easily won by the first player if played on a $3 \times 3 \times 3$ cube, by just placing the first token in the center. 
+Thats why tic-tac-toe in 3d is most regularly played on a $4 \times 4 \times 4$ board. <br>
 
 ## Minimax on an $n \times n \times n$ board
 Anyway, the real challenge is to write a version of the minimax algroithm which is able to play tic-tac-toe in three dimensions.
@@ -66,7 +70,7 @@ brute force soloutions would work by just giving the algorithm every empty cell 
 
 ### Currect idea
 In the following i assume that $n$ is even.
-My current idea, and the way the minimax3d algorithm currently works, is by slicing the cube into $2n$ 2d-boards ($n\times n$). These boards contain all possible diagonals, rows and columns that on which a player could win the game. <br>
+My current idea, and the way the minimax3d algorithm currently works, is by slicing the cube into $2n+2$ 2d-boards ($n\times n$). These boards contain all possible diagonals, rows and columns that on which a player could win the game. <br>
 The idea now is to evaluate every 2d-board with the minimax algorithm and find the best move over all boards. <br>
 Problem : is that a board that is about to be lost has a realtively high (or low) score (for the opponent), compared to a board that is winnable. This way the  algorithm perfers making a move that would eventually win the game over making a move that would keep it from losing the game.
 
@@ -86,7 +90,6 @@ def minimax3d:
     board.doMove(overall_best_move)
 
 ```
-
 
 
 

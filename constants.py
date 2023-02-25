@@ -8,6 +8,10 @@ class Constants:
     SYSTEM_VERBOSITY = 0
     PRINT_BOARD_AFTER_EVERY_MOVE = True
     isSimulating = False
+    
+    #minimax constants
+    MAX_DEPTH = 16
+    WIN_REWARD = MAX_DEPTH + 1
 
 
 def printToUser(message, message_verbosity, msgWhenSimulating):
