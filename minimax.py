@@ -82,47 +82,40 @@ def minimaxAlphaBeta(player, depth, board, alpha, beta, doMove=True):
         if (depth >= Constants.MAX_DEPTH or not board.hasMoves() or winner != 0):
             return evaluate(depth, winner)
 
-        best_eval = (-1) * player * math.inf   
+        best_eval = alpha if player == 1 else beta   
         moveWithGreatestEval = 0
         moves = board.getPossibleMoves()
-        transition_table = transposition_table_one if player == 1 else transposition_table_two
-        if board.getTuple() in transition_table:
-            tranisition_table_eval = transition_table[board.getTuple()]
-            best_eval = tranisition_table_eval[0]
-            moveWithGreatestEval = tranisition_table_eval[1]
-            transposition_hits += 1
-        else:
 
-            for move in moves:
-                #do move and get evaluation of move, thinking the opponent plays optimally
-                board.doMove(move, player)
-                if (player == -1):         
-                    moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, alpha, best_eval)
-                else:
-                    moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
 
-                if (depth == 0):
-                    printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
+        for move in moves:
+            #do move and get evaluation of move, thinking the opponent plays optimally
+            
+            board.doMove(move, player)
+            if (player == -1):         
+                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, alpha, best_eval)
+            else:
+                moveEval = minimaxAlphaBeta((-1) * player, depth + 1, board, best_eval, beta)
 
-                board.undoMove(move)
+            if (depth == 0):
+                printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
 
-                #if move was better then the previous best move, update
-                if (player == -1):
-                    #minimize
-                    if (moveEval < best_eval):
-                        best_eval = moveEval
-                        moveWithGreatestEval = move
-                    if (best_eval <= alpha):
-                        break
-                else:
-                    #maximize
-                    if (moveEval > best_eval):
-                        best_eval = moveEval
-                        moveWithGreatestEval = move
-                    if (best_eval >= beta):
-                        break
-            #add move to transposition table
-            transition_table[board.getTuple()] = (best_eval, moveWithGreatestEval)
+            board.undoMove(move)
+
+            #if move was better then the previous best move, update
+            if (player == -1):
+                #minimize
+                if (moveEval < best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
+                if (best_eval <= alpha):
+                    break
+            else:
+                #maximize
+                if (moveEval > best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
+                if (best_eval >= beta):
+                    break
 
         if (depth == 0 and doMove):
             board.doMove(moveWithGreatestEval, player)

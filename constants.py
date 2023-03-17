@@ -13,6 +13,9 @@ class Constants:
     MAX_DEPTH = 16
     WIN_REWARD = MAX_DEPTH + 1
 
+    #this leads to the directory in which the transposition-table files are stored
+    TRANSPOSITION_TABLE_FILE_PATH = "tables/"
+
 
 def printToUser(message, message_verbosity, msgWhenSimulating):
     if isAllowedToPrint(message_verbosity, msgWhenSimulating):
