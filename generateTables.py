@@ -2,46 +2,13 @@
 from board import Board
 from minimax import evaluate
 from player import doRandomPlayerMove
-from constants import Constants
+from constants import Constants, PlayerTranspositionTable
 import math
 import pickle
 #script that generates a dict in the format of 'boardsize , board : (bestMoveEval, bestMove)'
 
 #(board) -> ()
 
-class TranspositionTable:
-
-    def generateFilePath(directoryPath, boardSize, player): 
-        return directoryPath + str(boardSize) + "_" + str(player) + ".pkl"
-
-    def __init__(self, boardSize, player):
-        self.boardSize = boardSize  #boardsize of interest this table holds (3 if a 3x3 board is used)
-        self.table = {}
-        self.player = player 
-
-        self.readTable()
-
-    def readTable(self):
-        #initiate table with values from file
-
-        #save a dictionary
-        #with open('saved_dictionary.pkl', 'wb') as f:
-        #    pickle.dump(self.table, f)
-        
-        filePath = TranspositionTable.generateFilePath(Constants.TRANSPOSITION_TABLE_FILE_PATH, self.boardSize, self.player)
-        with open(filePath, 'rb') as f:
-            self.table = pickle.load(f)
-        print()
-
-        
-    def getMove(self, board):
-        #return the best move and evaluation, if stored in self.table
-        boardAsTuple = board.getTuple()
-        if not boardAsTuple in self.table:
-            return None
-        else:
-            return self.table[boardAsTuple]
-        
 
 
 
@@ -103,16 +70,18 @@ def gernerateTable(size):
     print(len(table_1))
     print(len(table_neg1))
 
+    b = Board(side_length=size, three_d=False)
+    minimax(1, 0, b)
+    print(len(table_1))
+    print(len(table_neg1))
+
 
     #write table into file
-    filePath_1 = TranspositionTable.generateFilePath(Constants.TRANSPOSITION_TABLE_FILE_PATH, size, 1)
+    filePath_1 = PlayerTranspositionTable.generateFilePath(Constants.TRANSPOSITION_TABLE_FILE_PATH, size, 1)
     with open(filePath_1, 'wb') as f:
         pickle.dump(table_1, f)
 
-    filePath_neg1 = TranspositionTable.generateFilePath(Constants.TRANSPOSITION_TABLE_FILE_PATH, size, -1)
+    filePath_neg1 = PlayerTranspositionTable.generateFilePath(Constants.TRANSPOSITION_TABLE_FILE_PATH, size, -1)
     with open(filePath_neg1, 'wb') as f:
         pickle.dump(table_neg1, f)
 
-
-#gernerateTable(3)
-t1 = TranspositionTable(boardSize=3, player=1)

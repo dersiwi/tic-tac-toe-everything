@@ -81,6 +81,7 @@ def mainWithArgparse(argv):
 
     
     if not args.simulate:
+        Constants.GLOBAL_TP_TABLE.load(args.board_size)
         playGame(playerOne = pOne,
                 playerTwo = pTwo,
                 boardsize = args.board_size,

@@ -4,9 +4,6 @@ from constants import Constants
 from constants import printToUser, isAllowedToPrint
 
 
-transposition_table_one = {}    #holds boards and best moves for player one
-transposition_table_two = {}    #holds boards and best moves for player two
-[transposition_table_one, transposition_table_two] #boardTuple : (bestMoveEval, bestMove)
 transposition_hits = 0
 """
 position : vallue by minimax
@@ -47,28 +44,36 @@ def minimax(player, depth, board):
     moveWithGreatestEval = 0
     moves = board.getPossibleMoves()
 
-    for move in moves:
-        #do move and get evaluation of move, thinking the opponent plays optimally
-        board.doMove(move, player)            
-        moveEval = minimax((-1) * player, depth + 1, board)
 
-        if (depth == 0):
-            printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
+    #check if the transposition table already holds the move
+    move_eval_pair = Constants.GLOBAL_TP_TABLE.getMoveEvalPair(board.getTuple(), player) 
+    if move_eval_pair != None:
+        moveWithGreatestEval = move_eval_pair[0]
+        best_eval = move_eval_pair[1]
+        print("Tp hit!")
+    else:
+        for move in moves:
+            #do move and get evaluation of move, thinking the opponent plays optimally
+            board.doMove(move, player)            
+            moveEval = minimax((-1) * player, depth + 1, board)
 
-        #undo move
-        board.undoMove(move)
+            if (depth == 0):
+                printToUser(str(move) + " : " + str(moveEval), message_verbosity=3, msgWhenSimulating=False)
 
-        #if move was better then the previous best move, update
-        if (player == -1):
-            #minimize
-            if (moveEval < best_eval):
-                best_eval = moveEval
-                moveWithGreatestEval = move
-        else:
-            #maximize
-            if (moveEval > best_eval):
-                best_eval = moveEval
-                moveWithGreatestEval = move
+            #undo move
+            board.undoMove(move)
+
+            #if move was better then the previous best move, update
+            if (player == -1):
+                #minimize
+                if (moveEval < best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
+            else:
+                #maximize
+                if (moveEval > best_eval):
+                    best_eval = moveEval
+                    moveWithGreatestEval = move
 
     if (depth == 0):
         board.doMove(moveWithGreatestEval, player)
