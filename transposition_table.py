@@ -20,9 +20,13 @@ class TranspositionTable:
         self.useTable = True
 
     def load(self, board_size):
+
         try:
+            print("Loading table. Depeding on the table size this could take a few seconds.")
+
             self.tp_table_1 = PlayerTranspositionTable(boardSize=board_size, player=1)
             self.tp_tbale_neg1 = PlayerTranspositionTable(boardSize=board_size, player=-1)
+            print("Finished loading table.")
         except:
             print("Could not load transposition table for board size {0}.".format(board_size))
             self.useTable = False

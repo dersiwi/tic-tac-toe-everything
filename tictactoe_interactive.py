@@ -79,9 +79,8 @@ def mainWithArgparse(argv):
     pOne = Player(type=playertypes[0], playerIndex= 1)
     pTwo = Player(type=playertypes[1], playerIndex= -1)
 
-    print("Loading table. Depeding on the table size this could take a few seconds.")
     TranspositionTable.initTable(args.board_size)
-    print("Finished loading table")
+
     if not args.simulate:
         
         playGame(playerOne = pOne,
