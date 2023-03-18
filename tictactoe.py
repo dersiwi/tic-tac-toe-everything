@@ -24,9 +24,6 @@ board3 = [-1,0,0, 0,-1,0 , 0,0,-1]
 board4 = [0,0,-1, 0,-1,0 , -1,0,0]
 
 
-rows = columns = int(math.sqrt(len(board)))
-
-
 
 
 def playerMove(player, board):

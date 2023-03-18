@@ -5,6 +5,7 @@ from board import Board
 from tictactoe import playGame
 from constants import Constants
 from simulating import simulate
+from transposition_table import TranspositionTable
 
 #interactive_arguments = sys.argv.pop(0)
 
@@ -78,10 +79,11 @@ def mainWithArgparse(argv):
     pOne = Player(type=playertypes[0], playerIndex= 1)
     pTwo = Player(type=playertypes[1], playerIndex= -1)
 
-
-    
+    print("Loading table. Depeding on the table size this could take a few seconds.")
+    TranspositionTable.initTable(args.board_size)
+    print("Finished loading table")
     if not args.simulate:
-        Constants.GLOBAL_TP_TABLE.load(args.board_size)
+        
         playGame(playerOne = pOne,
                 playerTwo = pTwo,
                 boardsize = args.board_size,

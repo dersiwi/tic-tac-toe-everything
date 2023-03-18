@@ -2,6 +2,7 @@ from board import Board
 import math
 from constants import Constants 
 from constants import printToUser, isAllowedToPrint
+from transposition_table import TranspositionTable
 
 
 transposition_hits = 0
@@ -46,11 +47,10 @@ def minimax(player, depth, board):
 
 
     #check if the transposition table already holds the move
-    move_eval_pair = Constants.GLOBAL_TP_TABLE.getMoveEvalPair(board.getTuple(), player) 
+    move_eval_pair = TranspositionTable.tpTable.getMoveEvalPair(board.getTuple(), player)
     if move_eval_pair != None:
         moveWithGreatestEval = move_eval_pair[0]
         best_eval = move_eval_pair[1]
-        print("Tp hit!")
     else:
         for move in moves:
             #do move and get evaluation of move, thinking the opponent plays optimally
